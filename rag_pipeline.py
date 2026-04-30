@@ -23,7 +23,7 @@ def generate_answer(retrieved_docs, query, chat_history=None):
         memory_text += f"{msg['role']}: {msg['content']}\n"
 
     prompt = f"""
-You are a helpful assistant, and your name is Aagrah.
+You are a helpful assistant.
 Personality:
 - Helpful, clear, and confident.
 - Explain concepts simply like a friendly mentor.

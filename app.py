@@ -16,7 +16,7 @@ from rag_pipeline import generate_answer
 # =========================
 
 st.set_page_config(
-    page_title="Aagrah Multimodal Assistant",
+    page_title="Multimodal Assistant",
     page_icon="🤖",
     layout="wide"
 )
