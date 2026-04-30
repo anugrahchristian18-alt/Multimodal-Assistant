@@ -1,6 +1,6 @@
 # Multimodal-Assistant
 
-# Aagrah Multimodal Assistant 🚀
+# Multimodal Assistant 🚀
 
 A multimodal AI assistant that can understand and answer questions from **PDFs, URLs, and Images** using Retrieval-Augmented Generation (RAG).
 Built with a focus on **accuracy, speed, and real-world usability**.
