@@ -17,7 +17,7 @@ from rich import print
 # =========================
 
 st.set_page_config(
-    page_title="Multimodal Assistant",
+    page_title=" Multimodal Assistant ",
     page_icon="🤖",
     layout="wide"
 )
