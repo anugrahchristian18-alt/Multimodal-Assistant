@@ -2,13 +2,13 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-
+from langchain_core.prompts import ChatPromptTemplate
 load_dotenv()
 
 # 🔥 YOUR LLM
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
-    temperature=0.3,
+    temperature=0.2,
     groq_api_key=os.getenv("GROQ_API_KEY")
 )
 
@@ -22,8 +22,8 @@ def generate_answer(retrieved_docs, query, chat_history=None):
     for msg in chat_history[-6:]:
         memory_text += f"{msg['role']}: {msg['content']}\n"
 
-    prompt = f"""
-You are a helpful assistant.
+    prompt = ChatGoogleGenerativeAI.from_template(f"""
+You are a helpful and intelligient assistant.
 Personality:
 - Helpful, clear, and confident.
 - Explain concepts simply like a friendly mentor.
@@ -35,7 +35,7 @@ Personality:
 - Always prefer practical, step-by-step guidance.
 
 Previous conversation:
-{memory_text}
+{chat_history}
 
 Context:
 {context}
@@ -44,8 +44,8 @@ User question:
 {query}
 
 If context is available, answer using it.
-If context is empty, answer normally.
+If context is empty, answer like a intelligient model.
 """
-
+    )
     response = llm.invoke(prompt)
     return response.content
