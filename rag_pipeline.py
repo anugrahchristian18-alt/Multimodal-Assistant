@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
+from rich import print
 load_dotenv()
 
 # 🔥 YOUR LLM
@@ -22,7 +23,7 @@ def generate_answer(retrieved_docs, query, chat_history=None):
     for msg in chat_history[-6:]:
         memory_text += f"{msg['role']}: {msg['content']}\n"
 
-    prompt = ChatGoogleGenerativeAI.from_template(f"""
+    prompt = ChatPromptTemplate.from_template(f"""
 You are a helpful and intelligient assistant.
 Personality:
 - Helpful, clear, and confident.

@@ -9,6 +9,7 @@ from Loaders.img import load_image
 from Processing.chunking import chunk_documents
 from vectorstore.vectordb import create_vectorstore, retrieve_docs
 from rag_pipeline import generate_answer
+from rich import print
 
 
 # =========================
