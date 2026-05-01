@@ -1,6 +1,4 @@
 import streamlit as st
-import os
-import json
 import tempfile
 
 from Loaders.loaders import load_pdf
@@ -9,7 +7,6 @@ from Loaders.img import load_image
 from Processing.chunking import chunk_documents
 from vectorstore.vectordb import create_vectorstore, retrieve_docs
 from rag_pipeline import generate_answer
-from rich import print
 
 
 # =========================
@@ -17,11 +14,27 @@ from rich import print
 # =========================
 
 st.set_page_config(
-    page_title=" Multimodal Assistant ",
-    page_icon="🤖",
+    page_title="RAGnify",
+    page_icon="🚀",
     layout="wide"
 )
-st.title("")
+
+
+# =========================
+# SESSION STATE
+# =========================
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+if "db" not in st.session_state:
+    st.session_state.db = None
+
+if "show_upload_options" not in st.session_state:
+    st.session_state.show_upload_options = False
+
+if "last_sources" not in st.session_state:
+    st.session_state.last_sources = []
 
 
 # =========================
@@ -85,44 +98,7 @@ st.markdown("""
 
 
 # =========================
-# MEMORY
-# =========================
-
-MEMORY_FILE = "chat_memory.json"
-
-def load_memory():
-    if os.path.exists(MEMORY_FILE):
-        try:
-            with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            return []
-    return []
-
-def save_memory(chat_history):
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(chat_history, f, indent=4)
-
-
-# =========================
-# SESSION STATE
-# =========================
-
-if "db" not in st.session_state:
-    st.session_state.db = None
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = load_memory()
-
-if "show_upload_options" not in st.session_state:
-    st.session_state.show_upload_options = False
-
-if "last_sources" not in st.session_state:
-    st.session_state.last_sources = []
-
-
-# =========================
-# HELPER FUNCTION
+# HELPER FUNCTIONS
 # =========================
 
 def add_knowledge(docs):
@@ -138,6 +114,15 @@ def save_uploaded_file(uploaded_file, suffix):
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
         temp_file.write(uploaded_file.read())
         return temp_file.name
+
+
+def add_to_chat(role, content):
+    st.session_state.chat_history.append({
+        "role": role,
+        "content": content
+    })
+
+    st.session_state.chat_history = st.session_state.chat_history[-20:]
 
 
 # =========================
@@ -164,11 +149,9 @@ with col1:
         st.success("Knowledge cleared.")
 
 with col2:
-    if st.button("🧠 Clear Memory"):
+    if st.button("🧠 Clear Chat"):
         st.session_state.chat_history = []
-        if os.path.exists(MEMORY_FILE):
-            os.remove(MEMORY_FILE)
-        st.success("Memory cleared.")
+        st.success("Chat cleared.")
 
 with col3:
     if st.session_state.db is not None:
@@ -178,10 +161,8 @@ with col3:
 
 
 # =========================
-# PLUS UPLOAD OPTION
+# UPLOAD OPTIONS
 # =========================
-
-st.markdown("")
 
 plus_col, text_col = st.columns([0.08, 0.92])
 
@@ -250,9 +231,7 @@ if st.session_state.show_upload_options:
 # =========================
 
 for msg in st.session_state.chat_history:
-    role = msg["role"]
-
-    with st.chat_message(role):
+    with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
 
@@ -267,26 +246,36 @@ if query:
         st.write(query)
 
     try:
-        if st.session_state.db is not None:
-            
-            with st.spinner("Thinking..."):
+        with st.spinner("Thinking..."):
+
+            if st.session_state.db is not None:
                 retrieved_docs = retrieve_docs(st.session_state.db, query)
 
-                # IMPORTANT:
-                # Positional arguments used to avoid keyword mismatch errors
                 answer = generate_answer(
                     retrieved_docs,
                     query,
                     st.session_state.chat_history[-20:]
                 )
 
-            with st.chat_message("assistant"):
-                st.write(answer)
+            else:
+                retrieved_docs = []
 
+                answer = generate_answer(
+                    [],
+                    query,
+                    st.session_state.chat_history[-20:]
+                )
+
+        with st.chat_message("assistant"):
+            st.write(answer)
+
+            if retrieved_docs:
                 st.markdown("#### 📚 Sources")
+
                 for i, doc in enumerate(retrieved_docs, start=1):
                     source = doc.metadata.get("source", "Unknown source")
                     page = doc.metadata.get("page", "N/A")
+
                     st.markdown(
                         f"""
                         <div class="source-box">
@@ -297,31 +286,8 @@ if query:
                         unsafe_allow_html=True
                     )
 
-        else:
-            retrieved_docs = []
-            with st.spinner("Thinking..."):
-
-                answer = generate_answer(
-                    [],
-                    query,
-                    st.session_state.chat_history[-6:]
-                )
-
-            with st.chat_message("assistant"):
-                st.write(answer)
-
-        st.session_state.chat_history.append({
-            "role": "user",
-            "content": query
-        })
-
-        st.session_state.chat_history.append({
-            "role": "assistant",
-            "content": answer
-        })
-
-        st.session_state.chat_history = st.session_state.chat_history[-6:]
-        save_memory(st.session_state.chat_history)
+        add_to_chat("user", query)
+        add_to_chat("assistant", answer)
 
     except Exception as e:
         with st.chat_message("assistant"):
