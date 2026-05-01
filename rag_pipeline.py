@@ -23,7 +23,7 @@ def generate_answer(retrieved_docs, query, chat_history=None):
     for msg in chat_history[-6:]:
         memory_text += f"{msg['role']}: {msg['content']}\n"
 
-    prompt = ChatPromptTemplate.from_template(f"""
+    prompt = f"""
 You are a helpful and intelligient assistant.
 Personality:
 - Helpful, clear, and confident.
@@ -47,6 +47,6 @@ User question:
 If context is available, answer using it.
 If context is empty, answer like a intelligient model.
 """
-    )
+    
     response = llm.invoke(prompt)
     return response.content

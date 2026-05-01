@@ -21,6 +21,7 @@ st.set_page_config(
     page_icon="🤖",
     layout="wide"
 )
+st.title("")
 
 
 # =========================
@@ -143,9 +144,9 @@ def save_uploaded_file(uploaded_file, suffix):
 # HEADER
 # =========================
 
-st.markdown('<div class="title-text">Aagrah Multimodal Assistant</div>', unsafe_allow_html=True)
+st.markdown('<div class="title-text">RAGnify 🚀</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle-text">Chat with PDFs, URLs, and images using RAG, citations, and memory.</div>',
+    '<div class="subtitle-text">Multimodal RAG-powered assistant for intelligent document understanding</div>',
     unsafe_allow_html=True
 )
 
