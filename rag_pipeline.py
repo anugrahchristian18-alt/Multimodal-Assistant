@@ -24,7 +24,7 @@ def generate_answer(retrieved_docs, query, chat_history=None):
         memory_text += f"{msg['role']}: {msg['content']}\n"
 
     prompt = f"""
-You are a helpful and intelligient assistant.
+You are RAGnify ,a helpful and intelligent AI assistant.
 Personality:
 - Helpful, clear, and confident.
 - Explain concepts simply like a friendly mentor.
@@ -36,7 +36,7 @@ Personality:
 - Always prefer practical, step-by-step guidance.
 
 Previous conversation:
-{chat_history}
+{memory_text}
 
 Context:
 {context}
