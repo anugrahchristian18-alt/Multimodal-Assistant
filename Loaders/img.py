@@ -1,26 +1,33 @@
-import pytesseract
 from PIL import Image
+import pytesseract
 from langchain_core.documents import Document
-import pytesseract
-import pytesseract
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-def load_image(path):
-    
-    img = Image.open(path)
-    
-    # improve OCR quality
-    img = img.convert("L")
-    
-    text = pytesseract.image_to_string(
-        img,
-        config="--psm 6"
-    )
-    
-    return [
-        Document(
-            page_content=text,
-            metadata={"source": path, "type": "image"}
-        )
-    ]
+def load_image(image_path):
+    try:
+        image = Image.open(image_path)
+
+        text = pytesseract.image_to_string(image)
+
+        if not text.strip():
+            return [
+                Document(
+                    page_content="No readable text was found in this image.",
+                    metadata={"source": image_path}
+                )
+            ]
+
+        return [
+            Document(
+                page_content=text,
+                metadata={"source": image_path}
+            )
+        ]
+
+    except Exception as e:
+        return [
+            Document(
+                page_content=f"Image OCR failed: {str(e)}",
+                metadata={"source": image_path}
+            )
+        ]

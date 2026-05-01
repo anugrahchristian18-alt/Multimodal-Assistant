@@ -218,10 +218,18 @@ if st.session_state.show_upload_options:
                 try:
                     image_path = save_uploaded_file(uploaded_image, ".png")
                     docs = load_image(image_path)
-                    add_knowledge(docs)
-                    st.success("Image loaded successfully.")
-                except Exception as e:
-                    st.error(f"Error loading image: {e}")
+
+                    if docs:
+                        add_knowledge(docs)
+                        st.success("Image loaded successfully.")
+                    else:
+                        st.warning("Could not extract text from image.")
+
+                except Exception:
+                    st.warning(
+                        "Image OCR is not available right now. "
+                        "PDF, URL, and text chat still work properly."
+                    )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
